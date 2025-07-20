@@ -36,7 +36,7 @@
         community.docker.docker_container:
           name: "{{ item.item }}"
           state: stopped
-        when: item.container is not none and item.container.State.Running and (restore_from_backup | default(false))
+        when: item.container is defined and item.container.State.Running and (restore_from_backup | default(false))
         loop: "{{ docker_info.results }}"
         loop_control:
           label: "{{ item.item }}"
