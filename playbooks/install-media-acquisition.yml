@@ -95,6 +95,12 @@
           state: unmounted
         when: restore_from_backup | default(false)
 
+      - name: Restore from backup - Clear directory contents
+        ansible.builtin.file:
+          path: /mnt/docker-backup
+          state: absent
+        when: restore_from_backup | default(false)
+
       - name: Install media services
         ansible.builtin.include_tasks: "tasks/media/{{ item }}.yml"
         loop: "{{ media_services }}"
