@@ -1,0 +1,7 @@
+---
+- name: Install tesla mate
+  hosts: ubuntu
+  become: true
+  tasks:
+      - name: Install tesla mate
+        ansible.builtin.include_tasks: "tasks/tesla/teslamate.yml"

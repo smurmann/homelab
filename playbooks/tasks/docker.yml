@@ -72,6 +72,15 @@
   command: docker info
   become: true
 
+- name: Install docker-compose
+  ansible.builtin.package:
+    name: "docker-compose-plugin"
+    state: present
+
+- name: Test docker compose
+  command: docker compose version
+  become: true
+
 # - name: Create custom docker network
 #   community.docker.docker_network:
 #     name: homelab
