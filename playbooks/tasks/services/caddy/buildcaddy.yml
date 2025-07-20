@@ -1,0 +1,25 @@
+
+  
+---
+- name: Build image on controller
+  community.docker.docker_image:
+    name: caddy-cloudflare-docker
+    tag: latest
+    build:
+      path: tasks/services/caddy
+    source: build
+  delegate_to: localhost
+  register: caddy_build_result
+
+- name: Ensure build directory exists
+  file:
+    path: "{{ playbook_dir }}/build"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+
+- name: Save Docker image to tar file
+  ansible.builtin.command:
+    cmd: docker save caddy-cloudflare-docker:latest -o {{ playbook_dir }}/build/caddy-cloudflare-docker.tar
+  delegate_to: localhost
+  when: caddy_build_result.changed

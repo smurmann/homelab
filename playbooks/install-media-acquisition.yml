@@ -1,0 +1,100 @@
+---
+- name: Install Media Acquisition
+  hosts: ubuntu
+  become: true
+  tasks:
+      - name: Mount Shared Media Drive
+        community.docker.docker_volume:
+            name: "media_{{ item }}"
+            driver_options:
+              type: "nfs"
+              o: "addr={{nfs_share_ip}},nolock,soft,nfsvers=4"
+              device: ":{{ nfs_share_media }}/{{ item }}"
+        loop:
+          - "tv"
+          - "anime"
+          - "movies"
+
+      - name: Mount Shared Download Drive
+        community.docker.docker_volume:
+            name: "media_downloads"
+            driver_options:
+              type: "nfs"
+              o: "addr={{nfs_share_ip}},nolock,soft,nfsvers=4"
+              device: ":{{ nfs_share_downloads }}"
+
+      - name: Get running Docker containers
+        community.docker.docker_container_info:
+          name: "{{ item }}"
+        register: docker_info
+        loop: "{{ media_services }}"
+        loop_control:
+          label: "{{ item }}"
+        when: restore_from_backup | default(false)
+
+      - name: Stop running Docker containers
+        community.docker.docker_container:
+          name: "{{ item.item }}"
+          state: stopped
+        when: item.container is not none and item.container.State.Running and (restore_from_backup | default(false))
+        loop: "{{ docker_info.results }}"
+        loop_control:
+          label: "{{ item.item }}"
+
+      - name: Restore from backup - Check mount directory
+        ansible.builtin.file:
+          path: /mnt/docker-backup
+          state: directory
+          mode: '0755'
+        when: restore_from_backup | default(false)
+
+      - name: Restore from backup - Check destination directory
+        ansible.builtin.file:
+          path: "{{ docker_dir }}"
+          state: directory
+          mode: '0755'
+        when: restore_from_backup | default(false)
+
+      - name:  Restore from backup - Ensure NFS client utilities are installed
+        ansible.builtin.apt:
+          name: nfs-common
+          state: present        
+        when: restore_from_backup | default(false)
+
+      - name: Restore from backup - Mount NFS share
+        ansible.posix.mount:
+          path: /mnt/docker-backup
+          src: "{{ nfs_share_ip }}:{{ nfs_share_docker_backups }}"
+          fstype: nfs
+          opts: rw
+          state: mounted
+        when: restore_from_backup | default(false)
+
+      - name: Restore from backup - Check if source folder exists
+        ansible.builtin.stat:
+          path: "/mnt/docker-backup/{{ item }}"
+        register: folder_stat
+        loop: "{{ media_services }}"
+        loop_control:
+          label: "{{ item }}"
+        when: restore_from_backup | default(false)
+
+      - name: Restore from backup - Copy selected folders from NFS to local
+        ansible.builtin.copy:
+          src: "/mnt/docker-backup/{{ item.item }}"
+          dest: "{{ docker_dir }}/"
+          remote_src: yes
+        loop: "{{ folder_stat.results }}"
+        when: item.stat is defined and item.stat.exists and restore_from_backup | default(false)
+        loop_control:
+          label: "{{ item.item }}"
+
+      - name: Restore from backup - Unmount NFS share
+        ansible.posix.mount:
+          path: /mnt/docker-backup
+          state: unmounted
+        when: restore_from_backup | default(false)
+
+      - name: Install media services
+        ansible.builtin.include_tasks: "tasks/media/{{ item }}.yml"
+        loop: "{{ media_services }}"

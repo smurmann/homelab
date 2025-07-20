@@ -1,0 +1,15 @@
+
+  
+---
+- name: Create Watchtower container
+  community.docker.docker_container:
+    name: watchtower
+    image: containrrr/watchtower
+    restart_policy: unless-stopped
+    state: started
+    env:
+      TZ: "{{ timezone }}"
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_POLL_INTERVAL: "3600"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

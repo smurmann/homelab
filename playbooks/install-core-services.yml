@@ -1,0 +1,25 @@
+---
+- name: Prepare Build Files
+  hosts: localhost
+  become: true
+  tasks:
+      - name: Build Caddy
+        ansible.builtin.include_tasks: tasks/services/caddy/buildcaddy.yml
+      - name: Set caddy_build_success fact
+        ansible.builtin.set_fact:
+          caddy_build_success: true
+
+- name: Install Core Services
+  hosts: ubuntu
+  become: true
+  tasks:
+      - name: Fail if build was not successful
+        ansible.builtin.fail:
+          msg: "Skipping because build did not complete"
+        when: hostvars['localhost'].caddy_build_success is not defined or not hostvars['localhost'].caddy_build_success
+
+      - name: Install Caddy
+        ansible.builtin.include_tasks: tasks/services/caddy/caddy.yml
+      - name: Install Watchtower
+        ansible.builtin.include_tasks: tasks/services/watchtower/watchtower.yml
+

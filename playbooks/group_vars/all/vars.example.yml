@@ -1,0 +1,50 @@
+---
+username: "adminuser"
+timezone: "Asia/Kuala_Lumpur"
+puid: "1000"
+pgid: "1000"
+
+packages:
+  - unzip
+  - wget
+  - curl
+  - git
+  - python3
+  - python3-pip
+
+pip_packages:
+  - ansible
+  - github3.py
+  - docker
+
+docker_dependencies:
+  - ca-certificates
+  - gnupg
+  - curl
+  - lsb-release
+
+docker_packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+
+docker_dir: /home/{{ username }}/docker_apps
+data_dir: /home/{{ username }}/data
+
+cloudflare_email: "<cloudflare_email>"
+cloudflare_api_key: "<cloudflare_api_key>"
+
+network_caddy: caddy
+domain: "seanli.net"
+lan_network: "100.0.0.0/24"
+
+nfs_share_ip: 100.0.0.12
+nfs_share_media: ":/volume1/media"
+nfs_share_downloads: ":/volume1/downloads"
+
+pia_user: <username>
+pia_pass: <password>
+
+

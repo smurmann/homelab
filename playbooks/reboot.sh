@@ -1,0 +1,1 @@
+ansible-playbook ./playbooks/reboot.yml -i inventory/hosts --user smurmann

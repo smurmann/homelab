@@ -1,0 +1,47 @@
+---
+- name: Create Required Directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0755"
+  loop:
+    - "{{ docker_dir }}/sonarr"
+
+- name: Add required permissions to data and docker_apps directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    recurse: true
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0755"
+  loop:
+    - "{{ docker_dir }}/sonarr"
+
+- name: Create sonarr Container
+  community.docker.docker_container:
+    name: sonarr
+    image: linuxserver/sonarr:latest
+    restart_policy: unless-stopped
+    state: started
+    ports:
+      - 8989:8989
+    volumes:
+      - "{{ docker_dir }}/sonarr:/config"
+      - "{{ docker_dir }}/shared:/shared"
+      - /etc/localtime:/etc/localtime:ro
+      - media_tv:/tv
+      - media_anime:/anime
+      - media_downloads:/downloads
+    env:
+      TZ: "{{ timezone }}"
+      PUID: "{{ puid }}"
+      PGID: "{{ pgid }}"
+    networks:
+      - name: "{{ network_caddy }}"
+    labels:
+      caddy: "sonarr.internal.{{domain}}"
+      caddy.reverse_proxy: "{{ '{{upstreams 8989}}' }}"
+  

@@ -1,0 +1,19 @@
+{
+  email cloudflare@seanli.net
+}
+
+puddingbox.seanli.net {
+    reverse_proxy 100.0.0.12:5555
+}
+
+7-1.seanli.net {
+    reverse_proxy 100.0.0.30:8123
+}
+
+requests.seanli.net {
+    reverse_proxy 100.0.0.24:5055
+}
+
+tesla.seanli.net {
+    reverse_proxy 100.0.0.30:80
+}

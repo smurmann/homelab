@@ -1,0 +1,4 @@
+
+- import_playbook: playbooks/setup-ubuntu-docker-vm.yml
+- import_playbook: playbooks/install-core-services.yml
+- import_playbook: playbooks/install-media-acquisition.yml

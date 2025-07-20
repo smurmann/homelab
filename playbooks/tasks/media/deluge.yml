@@ -1,0 +1,67 @@
+---
+- name: Create Required Directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0755"
+  loop:
+    - "{{ docker_dir }}/deluge"
+    - "{{ docker_dir }}/shared"
+
+- name: Add required permissions to data and docker_apps directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    recurse: true
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0755"
+  loop:
+    - "{{ docker_dir }}/deluge"
+    - "{{ docker_dir }}/shared"
+
+
+- name: Create Deluge Container
+  community.docker.docker_container:
+    name: deluge
+    image: binhex/arch-delugevpn:2.1.1-4-09
+    restart_policy: unless-stopped
+    state: started
+    privileged: true
+    ports:
+      - 8112:8112
+      - 8118:8118
+      - 58846:58846
+      - 58946:58946
+    volumes:
+      - "{{ docker_dir }}/deluge:/config"
+      - "{{ docker_dir }}/shared:/shared"
+      - "/etc/localtime:/etc/localtime:ro"
+      - media_downloads:/downloads
+    env:
+      TZ: "{{ timezone }}"
+      PUID: "{{ puid }}"
+      PGID: "{{ pgid }}"
+      UMASK: "000"
+      VPN_ENABLED: "yes"
+      VPN_USER: "{{ pia_user }}"
+      VPN_PASS: "{{ pia_pass }}"
+      VPN_PROV: "pia" 
+      VPN_CLIENT: "wireguard"
+      STRICT_PORT_FORWARD: "no"
+      ENABLE_PRIVOXY: "no"
+      DEBUG: "false"
+      DELUGE_WEB_LOG_LEVEL: "info"
+      DELUGE_DAEMON_LOG_LEVEL: "info"
+      LAN_NETWORK: "{{ lan_network }}"
+      NAME_SERVERS: "8.8.8.8,1.1.1.1"
+    sysctls:
+        net.ipv4.conf.all.src_valid_mark: "1"
+    networks:
+      - name: "{{ network_caddy }}"
+    labels:
+      caddy: "deluge.internal.{{domain}}"
+      caddy.reverse_proxy: "{{ '{{upstreams 8112}}' }}"
+  

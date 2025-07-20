@@ -1,0 +1,96 @@
+
+  
+---
+# - name: Copy Docker image to remote host
+#   ansible.builtin.copy:
+#     src: "{{ playbook_dir }}/build/caddy-cloudflare-docker.tar"
+#     dest: /tmp/caddy-cloudflare-docker.tar
+#   register: caddy_copy_image
+    
+# - name: Load Docker image on remote host
+#   ansible.builtin.command:
+#     cmd: docker load -i /tmp/caddy-cloudflare-docker.tar
+#   when: caddy_copy_image.changed
+
+# - name: Copy Dockerfile
+#   ansible.builtin.copy:
+#     src: tasks/services/caddy/Dockerfile
+#     dest: "{{ docker_dir }}/caddy/Dockerfile"
+
+# - name: Build caddy image
+#   community.docker.docker_image:
+#     name: caddy-cloudflare-docker
+#     build:
+#       path: "{{ docker_dir }}/caddy"
+#     source: build
+
+- name: Create a network
+  community.docker.docker_network:
+    name: "{{ network_caddy }}"
+
+- name: Create Required Directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0755"
+  loop:
+    - "{{ docker_dir }}/caddy/data"
+    - "{{ docker_dir }}/caddy/data/acme"
+
+- name: Copy Caddy base file
+  ansible.builtin.copy:
+    src: tasks/services/caddy/Caddyfile
+    dest: "{{ docker_dir }}/caddy/Caddyfile"
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0755"
+  register: caddy_file
+
+- name: Create Caddy Container
+  community.docker.docker_container:
+    name: caddy
+    image: homeall/caddy-reverse-proxy-cloudflare:latest
+    restart_policy: unless-stopped
+    state: started
+    ports:
+      - 80:80
+      - 443:443
+      - 443:443/udp
+    labels:
+      caddy.email: "{{ cloudflare_email }}"
+      caddy.acme_dns: "cloudflare {{ cloudflare_api_key }}"
+    env:
+      # CADDY_INGRESS_NETWORKS: caddy
+      TZ: "{{ timezone }}"
+      CADDY_DOCKER_CADDYFILE_PATH: "/Caddyfile"
+    networks:
+      - name: "{{ network_caddy }}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - "{{ docker_dir }}/caddy/data:/data"
+      - "{{ docker_dir }}/caddy/Caddyfile:/Caddyfile"
+    dns_servers:
+      - 1.1.1.1
+      - 8.8.8.8
+
+- name: Restart Caddy container if config changed
+  community.docker.docker_container:
+    name: caddy
+    state: started
+    restart: true
+  when: caddy_file.changed
+
+# - name: Create WHOAMI
+#   community.docker.docker_container:
+#     name: whoami
+#     image: traefik/whoami
+#     restart_policy: unless-stopped
+#     recreate: true
+#     state: started
+#     networks:
+#       - name: caddy
+#     labels:
+#       caddy: whoami.internaltest.seanli.net
+#       caddy.reverse_proxy: "{{ '{{upstreams 80}}' }}"

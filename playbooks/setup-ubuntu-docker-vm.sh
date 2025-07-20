@@ -1,0 +1,1 @@
+ansible-playbook ./playbooks/setup-ubuntu-docker-vm.yml -i inventory/hosts --user smurmann

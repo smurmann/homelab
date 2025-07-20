@@ -1,0 +1,22 @@
+---
+- name: Setup Ubuntu Docker VM
+  hosts: ubuntu
+  become: true
+
+  tasks:
+      - name: Update server and install essential packages
+        ansible.builtin.include_tasks: tasks/essential.yml
+
+      - name: Install qemu guest agent
+        ansible.builtin.include_tasks: tasks/qemu-guest-agent.yml
+
+      - name: Configure Time Zone
+        ansible.builtin.include_tasks: tasks/timezone.yml
+
+      - name: Install Docker
+        ansible.builtin.include_tasks: tasks/docker.yml
+
+  handlers:
+    - name: Reboot system
+      ansible.builtin.reboot:
+        reboot_timeout: 3200

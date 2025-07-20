@@ -1,0 +1,6 @@
+scratchnotes.txt
+reference/**
+playbooks/group_vars/all/vars.yml
+playbooks/tasks/services/caddy/Caddyfile
+playbooks/build/caddy-cloudflare-docker.tar
+inventory/hosts

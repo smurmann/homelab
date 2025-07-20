@@ -1,0 +1,68 @@
+---
+username: "smurmann"
+timezone: "Asia/Kuala_Lumpur"
+puid: "1000"
+pgid: "1000"
+
+packages:
+  - unzip
+  - wget
+  - curl
+  - git
+  - python3
+  - python3-pip
+
+pip_packages:
+  - ansible
+  - github3.py
+  - docker
+
+docker_dependencies:
+  - ca-certificates
+  - gnupg
+  - curl
+  - lsb-release
+
+docker_packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+
+docker_dir: /home/{{ username }}/docker_apps
+data_dir: /home/{{ username }}/data
+
+cloudflare_email: "cloudflare@seanli.net"
+cloudflare_api_key: "9aAWYQXMptmxTwMCWAH7JT7mTLc2UTZe15SWaZ19"
+
+network_caddy: caddy
+domain: "seanli.net"
+lan_network: "100.0.0.0/24"
+
+nfs_share_ip: 100.0.0.12
+nfs_share_media: ":/volume1/media"
+nfs_share_downloads: ":/volume1/downloads"
+
+pia_user: p9007672
+pia_pass: erNWw8ioqg
+
+#zerossl_api_key: "1dae27fcdac951a1583f0204805d4f97"
+
+
+
+# ip_address: "100.0.0.101"
+# docker_dir: /home/{{ username }}/docker_apps
+# data_dir: /home/{{ username }}/data
+# domain: "seanli.net"
+# cloudflare_email: "cloudflare@seanli.net"
+# cloudflare_api_key: "8a0df3489d14a0994ffcb5cfd9a85cd89b670"
+# traefik_basic_auth_hash: "smurmann:{SHA}tmbex3HDsMsaxDrH1XvblN1T/4Q="
+# jwt_secret: "Pp9ON3CIkDh4EyF2GOgUVIfeOBwiTvGBeLvcocMXutpDshRAHKbod8KSac5YhAjz"
+# authelia_sqlite_encryption_key: "mihcoajBielefeld1205!"
+# google_mail: "seanli.murmann@gmail.com"
+# google_insecure_app_pass: "hxpr kgtc wonz zasq"
+# authelia_admin_mail: "seanli.murmann@gmail.com"
+# authelia_admin_argon2id_pass: "$argon2id$v=19$m=16,t=2,p=1$c29tZXNhbHQ$N21yoCOV85Uo0TMMa8lO+g"
+# wg_password: "mihcoajBielefeld1205!"
+# codeserver_password: "mihcoajBielefeld1205!"

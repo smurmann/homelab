@@ -1,0 +1,41 @@
+---
+- name: Create Required Directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0755"
+  loop:
+    - "{{ docker_dir }}/overseerr"
+
+- name: Add required permissions to data and docker_apps directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    recurse: true
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0755"
+  loop:
+    - "{{ docker_dir }}/overseerr"
+
+- name: Create overseerr Container
+  community.docker.docker_container:
+    name: overseerr
+    image: sctx/overseerr
+    restart_policy: always
+    state: started
+    ports:
+      - 5055:5055
+    volumes:
+      - "{{ docker_dir }}/overseerr:/app/config"
+    env:
+      TZ: "{{ timezone }}"
+      LOG_LEVEL: "info"
+    networks:
+      - name: "{{ network_caddy }}"
+    labels:
+      caddy: "requests.{{domain}}"
+      caddy.reverse_proxy: "{{ '{{upstreams 5055}}' }}"
+  

@@ -1,0 +1,21 @@
+---
+- name: Create unpackerr Container
+  community.docker.docker_container:
+    name: unpackerr
+    image: golift/unpackerr
+    restart_policy: always
+    state: started
+    volumes:
+      - media_downloads:/downloads
+    env:
+      TZ: "{{ timezone }}"
+      PUID: "{{ puid }}"
+      PGID: "{{ pgid }}"
+      UN_LOG_FILE: "/downloads/unpackerr.log"
+      UN_SONARR_0_URL: "http://sonarr:8989"
+      UN_SONARR_0_API_KEY: "{{ sonarr_api_key}}"
+      UN_RADARR_0_URL: "http://radarr:7878"
+      UN_RADARR_0_API_KEY: "{{ radarr_api_key}}"
+    networks:
+      - name: "{{ network_caddy }}"
+  

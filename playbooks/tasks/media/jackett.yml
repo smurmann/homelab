@@ -1,0 +1,42 @@
+---
+- name: Create Required Directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0755"
+  loop:
+    - "{{ docker_dir }}/jackett"
+ 
+- name: Add required permissions to data and docker_apps directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    recurse: true
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0755"
+  loop:
+    - "{{ docker_dir }}/jackett" 
+
+- name: Create Jackett Container
+  community.docker.docker_container:
+    name: jackett
+    image: lscr.io/linuxserver/jackett:latest
+    restart_policy: unless-stopped
+    state: started
+    ports:
+      - 9117:9117
+    volumes:
+      - "{{ docker_dir }}/jackett:/config"
+    env:
+      TZ: "{{ timezone }}"
+      PUID: "{{ puid }}"
+      PGID: "{{ pgid }}"
+    networks:
+      - name: "{{ network_caddy }}"
+    labels:
+      caddy: "jackett.internal.{{domain}}"
+      caddy.reverse_proxy: "{{ '{{upstreams 9117}}' }}"
+  

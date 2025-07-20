@@ -1,0 +1,38 @@
+- hosts: "*"
+  become: yes
+  tasks:
+    - name: Create a new ext4 primary partition on /dev/sdb
+      community.general.parted:
+        device: /dev/sdb
+        number: 1
+        state: present
+        fs_type: ext4
+        part_type: primary
+
+    - name: Format /dev/sdb1 as ext4
+      community.general.filesystem:
+        fstype: ext4
+        dev: /dev/sdb1
+        force: yes
+
+    - name: Create mount point directory
+      ansible.builtin.file:
+        path: /mnt/data
+        state: directory
+        mode: '0755'
+
+    - name: Mount the new partition
+      ansible.posix.mount:
+        path: /mnt/data
+        src: /dev/sdb1
+        fstype: ext4
+        opts: defaults
+        state: mounted
+
+    - name: Ensure it persists on reboot
+      ansible.posix.mount:
+        path: /mnt/data
+        src: /dev/sdb1
+        fstype: ext4
+        opts: defaults
+        state: present
