@@ -22,6 +22,61 @@
     - "{{ docker_dir }}/deluge"
     - "{{ docker_dir }}/shared"
 
+# alternative way of doing deluge with vpn.
+# - name: Create GlueTun
+#   community.docker.docker_container:
+#     name: gluetun
+#     image: qmcgaw/gluetun
+#     restart_policy: unless-stopped
+#     state: started
+#     privileged: true
+#     capabilities:
+#       - NET_ADMIN
+#     ports:
+#       - 8112:8112
+#       - 1080:1080
+#       - 8888:8888
+#     volumes:
+#       - "{{ docker_dir }}/gluetun:/config"
+#     env:
+#       TZ: "{{ timezone }}"
+#       VPN_SERVICE_PROVIDER: "custom"
+#       VPN_TYPE: "wireguard"
+#       WIREGUARD_ENDPOINT_IP: "{{ wireguard_endpoint_ip }}"
+#       WIREGUARD_ENDPOINT_PORT: "{{ wireguard_endpoint_port }}"
+#       WIREGUARD_PUBLIC_KEY: "{{ wireguard_public_key }}"
+#       WIREGUARD_PRIVATE_KEY: "{{ wireguard_private_key }}"
+#       WIREGUARD_ADDRESSES: "{{ wireguard_addresses }}"
+#       FIREWALL: "on"
+#     networks:
+#       - name: "{{ network_caddy }}"
+
+# - name: Create Deluge Container
+#   community.docker.docker_container:
+#     name: deluge
+#     image: linuxserver/deluge:latest
+#     restart_policy: unless-stopped
+#     state: started
+#     privileged: true
+#     ports:
+#       - 8112:8112
+#       - 6881:6881
+#       - 6881:6881/udp
+#       - 58946:58946
+#     volumes:
+#       - "{{ docker_dir }}/deluge:/config"
+#       - "{{ docker_dir }}/shared:/shared"
+#       - "/etc/localtime:/etc/localtime:ro"
+#       - media_downloads:/downloads
+#     env:
+#       TZ: "{{ timezone }}"
+#       PUID: "{{ puid }}"
+#       PGID: "{{ pgid }}"
+#     networks:
+#       - name: "service:gluetun"
+#     labels:
+#       caddy: "deluge.internal.{{domain}}"
+#       caddy.reverse_proxy: "{{ '{{upstreams 8112}}' }}"
 
 - name: Create Deluge Container
   community.docker.docker_container:
