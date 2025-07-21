@@ -19,7 +19,7 @@ services:
       - all
 
   database:
-    image: postgres:15
+    image: postgres:16
     restart: always
     environment:
       - POSTGRES_USER=teslamate
@@ -49,7 +49,7 @@ services:
 
 volumes:
   teslamate_teslamate-db:
-      external: true
+      external: false
   teslamate-grafana-data:
       driver_opts:
           type: none

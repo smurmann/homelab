@@ -20,6 +20,8 @@
 
       - name: Install Caddy
         ansible.builtin.include_tasks: tasks/services/caddy/caddy.yml
+      - name: Install Portainer
+        ansible.builtin.include_tasks: tasks/services/portainer/portainer.yml
       - name: Install Watchtower
         ansible.builtin.include_tasks: tasks/services/watchtower/watchtower.yml
 

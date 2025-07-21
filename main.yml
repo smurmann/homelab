@@ -1,4 +1,8 @@
+# This will pretty much set up the entire docker vm.
+# there will be some issues with the telsa mate setup because the restore from the back up wasn't very good.
+# additionally, i think I need to work on figuring out where to keep the actual data so that I can restore it using this as well.
 
 - import_playbook: playbooks/setup-ubuntu-docker-vm.yml
 - import_playbook: playbooks/install-core-services.yml
 - import_playbook: playbooks/install-media-acquisition.yml
+- import_playbook: playbooks/install-tesla-mate.yml
